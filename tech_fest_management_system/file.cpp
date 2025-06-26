@@ -165,3 +165,24 @@ void writeParticipantToFile(char* name, char* roll, char* dept, char* contact,
         cout << "Error: Could not open participants.txt for writing!" << endl;
     }
 }
+
+void intToStr(int num, char* str) {
+    if (num == 0) {
+        str[0] = '0';
+        str[1] = '\0';
+        return;
+    }
+
+    int temp = num;
+    int digits = 0;
+    while (temp > 0) {
+        temp /= 10;
+        digits++;
+    }
+
+    str[digits] = '\0';
+    for (int i = digits - 1; i >= 0; i--) {
+        str[i] = '0' + (num % 10);
+        num /= 10;
+    }
+}
