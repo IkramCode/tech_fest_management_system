@@ -186,3 +186,35 @@ void intToStr(int num, char* str) {
         num /= 10;
     }
 }
+
+void writeScoresToFile(char* eventName, char** rolls, int* scores, int count) {
+    ofstream fout("scores.txt", ios::app);
+    if (fout.is_open()) {
+        fout << "Scores for Event: " << eventName << endl;
+        for (int i = 0; i < count; i++) {
+            fout << rolls[i] << " : " << scores[i] << endl;
+        }
+        fout << "--------------------------" << endl;
+        fout.close();
+        cout << "Scores saved to scores.txt" << endl;
+    }
+    else {
+        cout << "Error: Could not open scores.txt for writing!" << endl;
+    }
+}
+
+void writeResultsToFile(char* eventName, char** rolls, int* scores, int* top) {
+    ofstream fout("results.txt", ios::app);
+    if (fout.is_open()) {
+        fout << "Winners for " << eventName << endl;
+        for (int i = 0; i < 3 && top[i] != -1; i++) {
+            fout << i + 1 << ". " << rolls[top[i]] << " - " << scores[top[i]] << endl;
+        }
+        fout << "--------------------------" << endl;
+        fout.close();
+        cout << "Results saved to results.txt" << endl;
+    }
+    else {
+        cout << "Error: Could not open results.txt for writing!" << endl;
+    }
+}
