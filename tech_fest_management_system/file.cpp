@@ -132,3 +132,36 @@ void getTime(int eventTime, char* timeStr) {
     }
 }
 
+void writeEventToFile(char* name, char* date, char* timeStr) {
+    ofstream fout("events.txt", ios::app);
+    if (fout.is_open()) {
+        fout << "Event Name: " << name << endl;
+        fout << "Date: " << date << endl;
+        fout << "Time: " << timeStr << endl;
+        fout << "--------------------------" << endl;
+        fout.close();
+        cout << "Event saved to events.txt" << endl;
+    }
+    else {
+        cout << "Error: Could not open events.txt for writing!" << endl;
+    }
+}
+
+void writeParticipantToFile(char* name, char* roll, char* dept, char* contact,
+    char* eventName, char* id) {
+    ofstream fout("participants.txt", ios::app);
+    if (fout.is_open()) {
+        fout << "Name: " << name << endl;
+        fout << "Roll Number: " << roll << endl;
+        fout << "Department: " << dept << endl;
+        fout << "Contact: " << contact << endl;
+        fout << "Event: " << eventName << endl;
+        fout << "Participation ID: " << id << endl;
+        fout << "--------------------------" << endl;
+        fout.close();
+        cout << "Participant data saved to participants.txt" << endl;
+    }
+    else {
+        cout << "Error: Could not open participants.txt for writing!" << endl;
+    }
+}
