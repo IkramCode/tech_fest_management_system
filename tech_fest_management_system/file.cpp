@@ -218,3 +218,34 @@ void writeResultsToFile(char* eventName, char** rolls, int* scores, int* top) {
         cout << "Error: Could not open results.txt for writing!" << endl;
     }
 }
+
+void generateCertificate(char* name, char* eventName, int position) {
+    ofstream fout("certificates.txt", ios::app);
+    if (fout.is_open()) {
+        fout << "========================================" << endl;
+        fout << "           CERTIFICATE OF ACHIEVEMENT" << endl;
+        fout << "========================================" << endl;
+        fout << endl;
+        fout << "This is to certify that" << endl;
+        fout << "        " << name << endl;
+        fout << "has secured ";
+        if (position == 1)
+            fout << "1st Position";
+        else if (position == 2)
+            fout << "2nd Position";
+        else if (position == 3)
+            fout << "3rd Position";
+        fout << " in" << endl;
+        fout << "        " << eventName << endl;
+        fout << endl;
+        fout << "Congratulations on this achievement!" << endl;
+        fout << endl;
+        fout << "TechFest 2025" << endl;
+        fout << "========================================" << endl;
+        fout << endl;
+        fout.close();
+    }
+    else {
+        cout << "Error: Could not open certificates.txt for writing!" << endl;
+    }
+}
