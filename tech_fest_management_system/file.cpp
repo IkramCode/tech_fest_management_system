@@ -80,3 +80,55 @@ bool validateDate(char* date) {
 
     return true;
 }
+
+void getValidDate(char* date) {
+    while (true) {
+        cout << "Date (DD/MM/YYYY): ";
+        cin.ignore();
+        cin.getline(date, 100);
+        if (validateDate(date))
+            break;
+        cout << "Invalid date format. Try again." << endl;
+    }
+}
+
+int timeSelect(int* timeSlots) {
+    int op;
+    cout << "Available Time Slots:" << endl;
+    cout << "1. 09:00AM" << endl;
+    cout << "2. 10:00AM" << endl;
+    cout << "3. 12:00PM" << endl;
+    cout << "4. 02:00PM" << endl;
+    cout << "5. 03:00PM" << endl;
+    cout << "Choose time slot: ";
+    op = intValidation();
+    while (op < 1 || op > 5) {
+        cout << "Invalid choice, try again: ";
+        op = intValidation();
+    }
+    return timeSlots[op - 1];
+}
+
+void getTime(int eventTime, char* timeStr) {
+    switch (eventTime) {
+    case 1:
+        strCopy(timeStr, "09:00AM");
+        break;
+    case 2:
+        strCopy(timeStr, "10:00AM");
+        break;
+    case 3:
+        strCopy(timeStr, "12:00PM");
+        break;
+    case 4:
+        strCopy(timeStr, "02:00PM");
+        break;
+    case 5:
+        strCopy(timeStr, "03:00PM");
+        break;
+    default:
+        strCopy(timeStr, "Invalid Slot");
+        break;
+    }
+}
+
