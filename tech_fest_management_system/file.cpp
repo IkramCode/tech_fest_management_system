@@ -1,4 +1,4 @@
-#include <fstream>
+﻿#include <fstream>
 #include <iostream>
 using namespace std;
 
@@ -250,6 +250,207 @@ void generateCertificate(char* name, char* eventName, int position) {
     }
 }
 
+bool strComp(const char* str1, const char* str2) {
+    while (*str1 && *str2) {
+        if (*str1 != *str2)
+            return false;
+        str1++;
+        str2++;
+    }
+    return *str1 == *str2; // Both should reach null terminator
+}
+
+bool uniqueRollNumber(char** rollNumbers, int count, const char* roll) {
+    for (int i = 0; i < count; i++) {
+        if (strComp(rollNumbers[i], roll)) {
+            return false; // Roll number already exists
+        }
+    }
+    return true; // Unique roll number
+}
+
+bool uniqueContact(char** contacts, int count, const char* contact) {
+    for (int i = 0; i < count; i++) {
+        if (strComp(contacts[i], contact)) {
+            return false; // Contact already exists
+        }
+    }
+    return true; // Unique contact
+}
+
+void getUniqueRollNumber(char** rollNumbers, int count, char* roll) {
+    while (true) {
+        cout << "Enter Roll Number: ";
+        cin.getline(roll, 100);
+        if (uniqueRollNumber(rollNumbers, count, roll)) {
+            return; // Unique roll number found
+        }
+        cout << "Roll number already exists. Please enter a unique roll number." << endl;
+    }
+}
+
+void getUniqueContact(char** contacts, int count, char* contact) {
+    while (true) {
+        cout << "Enter Contact: ";
+        cin.getline(contact, 100);
+        if (uniqueContact(contacts, count, contact)) {
+            return; // Unique contact found
+        }
+        cout << "Contact already exists. Please enter a unique contact." << endl;
+    }
+}
+
+void addEvent(const int maxEvents, int& eventCounter, char** eventNames, char** eventDates, int* timeSlots, int* eventTimes) {
+    if (eventCounter < maxEvents) {
+        cout << "Enter Event Name: ";
+        cin.ignore();
+        cin.getline(eventNames[eventCounter], 100);
+        getValidDate(eventDates[eventCounter]);
+        eventTimes[eventCounter] = timeSelect(timeSlots);
+        char timeStr[20];
+        getTime(eventTimes[eventCounter], timeStr);
+        writeEventToFile(eventNames[eventCounter], eventDates[eventCounter], timeStr);
+        cout << "Event Added Successfully." << endl;
+        eventCounter++;
+    }
+    else {
+        cout << "Maximum events reached." << endl;
+    }
+}
+
+void registerParticipant(const int maxEvents, const int maxParticipants, int eventCounter, int& participantIDCounter,
+    char** eventNames, char** names, char** rollNumbers, char** departments, char** contacts,
+    int* participantCount) {
+    if (eventCounter == 0) {
+        cout << "Add at least one event first." << endl;
+        return;
+    }
+
+    cout << "Select Event to Register In:" << endl;
+    for (int i = 0; i < eventCounter; i++) {
+        cout << i + 1 << ". " << eventNames[i] << endl;
+    }
+    cout << "Enter choice: ";
+    int ev = intValidation();
+    while (ev < 1 || ev > eventCounter) {
+        cout << "Invalid event. Try again: ";
+        ev = intValidation();
+    }
+    ev--;
+
+    if (participantCount[ev] >= maxParticipants) {
+        cout << "Event is full." << endl;
+        return;
+    }
+
+    cout << "Enter Name: ";
+    cin.ignore();
+    cin.getline(names[ev * maxParticipants + participantCount[ev]], 100);
+    getUniqueRollNumber(rollNumbers + ev * maxParticipants, participantCount[ev],
+        rollNumbers[ev * maxParticipants + participantCount[ev]]);
+    cout << "Enter Department: ";
+    cin.getline(departments[ev * maxParticipants + participantCount[ev]], 100);
+    getUniqueContact(contacts + ev * maxParticipants, participantCount[ev],
+        contacts[ev * maxParticipants + participantCount[ev]]);
+
+    char id[100] = "TECHFEST-2025-";
+    char buffer[10];
+    intToStr(++participantIDCounter, buffer);
+    strCopy(id + strLen(id), buffer);
+
+    cout << "Participant Registered with ID: " << id << endl;
+    writeParticipantToFile(
+        names[ev * maxParticipants + participantCount[ev]],
+        rollNumbers[ev * maxParticipants + participantCount[ev]],
+        departments[ev * maxParticipants + participantCount[ev]],
+        contacts[ev * maxParticipants + participantCount[ev]],
+        eventNames[ev], id);
+    participantCount[ev]++;
+}
+
+void submitScores(const int maxParticipants, int eventCounter, char** eventNames, char** names,
+    char** rollNumbers, int* participantCount, int** scores) {
+    if (eventCounter == 0) {
+        cout << "No events available. Add events first." << endl;
+        return;
+    }
+
+    for (int e = 0; e < eventCounter; e++) {
+        if (participantCount[e] == 0) {
+            cout << "No participants in " << eventNames[e] << ". Skipping..." << endl;
+            continue;
+        }
+
+        cout << "\nEnter scores for " << eventNames[e] << ":" << endl;
+        for (int p = 0; p < participantCount[e]; p++) {
+            cout << "Participant " << names[e * maxParticipants + p] << " ("
+                << rollNumbers[e * maxParticipants + p] << ") score (0-100): ";
+            int s = intValidation();
+            while (s < 0 || s > 100) {
+                cout << "Invalid score. Try again (0-100): ";
+                s = intValidation();
+            }
+            scores[e][p] = s;
+        }
+        writeScoresToFile(eventNames[e], &rollNumbers[e * maxParticipants],
+            scores[e], participantCount[e]);
+    }
+    cout << "All scores submitted successfully." << endl;
+}
+
+void showWinnersAndGenerateCertificates(const int maxParticipants, int eventCounter, char** eventNames,
+    char** names, char** rollNumbers, int* participantCount, int** scores) {
+    if (eventCounter == 0) {
+        cout << "No events available." << endl;
+        return;
+    }
+
+    for (int e = 0; e < eventCounter; e++) {
+        if (participantCount[e] == 0) {
+            cout << "No participants in " << eventNames[e] << endl;
+            continue;
+        }
+
+        cout << "\nTop 3 winners for " << eventNames[e] << ":" << endl;
+        int top[3] = { -1, -1, -1 }, topScores[3] = { -1, -1, -1 };
+
+        for (int p = 0; p < participantCount[e]; p++) {
+            int score = scores[e][p];
+            if (score > topScores[0]) {
+                topScores[2] = topScores[1];
+                top[2] = top[1];
+                topScores[1] = topScores[0];
+                top[1] = top[0];
+                topScores[0] = score;
+                top[0] = p;
+            }
+            else if (score > topScores[1]) {
+                topScores[2] = topScores[1];
+                top[2] = top[1];
+                topScores[1] = score;
+                top[1] = p;
+            }
+            else if (score > topScores[2]) {
+                topScores[2] = score;
+                top[2] = p;
+            }
+        }
+
+        for (int i = 0; i < 3 && top[i] != -1; i++) {
+            cout << i + 1 << ". " << names[e * maxParticipants + top[i]] << " ("
+                << rollNumbers[e * maxParticipants + top[i]] << ") - "
+                << topScores[i] << " points" << endl;
+
+            generateCertificate(names[e * maxParticipants + top[i]],
+                eventNames[e], i + 1);
+        }
+
+        writeResultsToFile(eventNames[e], &rollNumbers[e * maxParticipants],
+            scores[e], top);
+    }
+    cout << "\nCertificates generated for all winners!" << endl;
+}
+
 int main() {
     const int maxEvents = 5;
     const int maxParticipants = 30;
@@ -296,150 +497,19 @@ int main() {
         int choice = intValidation();
 
         if (choice == 1) {
-            if (eventCounter < maxEvents) {
-                cout << "Enter Event Name: ";
-                cin.ignore();
-                cin.getline(eventNames[eventCounter], 100);
-                getValidDate(eventDates[eventCounter]);
-                eventTimes[eventCounter] = timeSelect(timeSlots);
-                char timeStr[20];
-                getTime(eventTimes[eventCounter], timeStr);
-                writeEventToFile(eventNames[eventCounter], eventDates[eventCounter],
-                    timeStr);
-                cout << "Event Added Successfully." << endl;
-                eventCounter++;
-            }
-            else {
-                cout << "Maximum events reached." << endl;
-            }
+            addEvent(maxEvents, eventCounter, eventNames, eventDates, timeSlots, eventTimes);
         }
         else if (choice == 2) {
-            if (eventCounter == 0) {
-                cout << "Add at least one event first." << endl;
-                continue;
-            }
-            cout << "Select Event to Register In:" << endl;
-            for (int i = 0; i < eventCounter; i++) {
-                cout << i + 1 << ". " << eventNames[i] << endl;
-            }
-            cout << "Enter choice: ";
-            int ev = intValidation();
-            while (ev < 1 || ev > eventCounter) {
-                cout << "Invalid event. Try again: ";
-                ev = intValidation();
-            }
-            ev--;
-
-            if (participantCount[ev] >= maxParticipants) {
-                cout << "Event is full." << endl;
-                continue;
-            }
-
-            cout << "Enter Name: ";
-            cin.ignore();
-            cin.getline(names[ev * maxParticipants + participantCount[ev]], 100);
-            cout << "Enter Roll Number: ";
-            cin.getline(rollNumbers[ev * maxParticipants + participantCount[ev]],
-                100);
-            cout << "Enter Department: ";
-            cin.getline(departments[ev * maxParticipants + participantCount[ev]],
-                100);
-            cout << "Enter Contact: ";
-            cin.getline(contacts[ev * maxParticipants + participantCount[ev]], 100);
-
-            char id[100] = "TECHFEST-2025-";
-            char buffer[10];
-            intToStr(++participantIDCounter, buffer);
-            strCopy(id + strLen(id), buffer);
-
-            cout << "Participant Registered with ID: " << id << endl;
-            writeParticipantToFile(
-                names[ev * maxParticipants + participantCount[ev]],
-                rollNumbers[ev * maxParticipants + participantCount[ev]],
-                departments[ev * maxParticipants + participantCount[ev]],
-                contacts[ev * maxParticipants + participantCount[ev]], eventNames[ev],
-                id);
-            participantCount[ev]++;
+            registerParticipant(maxEvents, maxParticipants, eventCounter, participantIDCounter,
+                eventNames, names, rollNumbers, departments, contacts, participantCount);
         }
         else if (choice == 3) {
-            if (eventCounter == 0) {
-                cout << "No events available. Add events first." << endl;
-                continue;
-            }
-
-            for (int e = 0; e < eventCounter; e++) {
-                if (participantCount[e] == 0) {
-                    cout << "No participants in " << eventNames[e] << ". Skipping..."
-                        << endl;
-                    continue;
-                }
-
-                cout << "\nEnter scores for " << eventNames[e] << ":" << endl;
-                for (int p = 0; p < participantCount[e]; p++) {
-                    cout << "Participant " << names[e * maxParticipants + p] << " ("
-                        << rollNumbers[e * maxParticipants + p] << ") score (0-100): ";
-                    int s = intValidation();
-                    while (s < 0 || s > 100) {
-                        cout << "Invalid score. Try again (0-100): ";
-                        s = intValidation();
-                    }
-                    scores[e][p] = s;
-                }
-                writeScoresToFile(eventNames[e], &rollNumbers[e * maxParticipants],
-                    scores[e], participantCount[e]);
-            }
-            cout << "All scores submitted successfully." << endl;
+            submitScores(maxParticipants, eventCounter, eventNames, names, rollNumbers,
+                participantCount, scores);
         }
         else if (choice == 4) {
-            if (eventCounter == 0) {
-                cout << "No events available." << endl;
-                continue;
-            }
-
-            for (int e = 0; e < eventCounter; e++) {
-                if (participantCount[e] == 0) {
-                    cout << "No participants in " << eventNames[e] << endl;
-                    continue;
-                }
-
-                cout << "\nTop 3 winners for " << eventNames[e] << ":" << endl;
-                int top[3] = { -1, -1, -1 }, topScores[3] = { -1, -1, -1 };
-
-                for (int p = 0; p < participantCount[e]; p++) {
-                    int score = scores[e][p];
-                    if (score > topScores[0]) {
-                        topScores[2] = topScores[1];
-                        top[2] = top[1];
-                        topScores[1] = topScores[0];
-                        top[1] = top[0];
-                        topScores[0] = score;
-                        top[0] = p;
-                    }
-                    else if (score > topScores[1]) {
-                        topScores[2] = topScores[1];
-                        top[2] = top[1];
-                        topScores[1] = score;
-                        top[1] = p;
-                    }
-                    else if (score > topScores[2]) {
-                        topScores[2] = score;
-                        top[2] = p;
-                    }
-                }
-
-                for (int i = 0; i < 3 && top[i] != -1; i++) {
-                    cout << i + 1 << ". " << names[e * maxParticipants + top[i]] << " ("
-                        << rollNumbers[e * maxParticipants + top[i]] << ") - "
-                        << topScores[i] << " points" << endl;
-
-                    generateCertificate(names[e * maxParticipants + top[i]],
-                        eventNames[e], i + 1);
-                }
-
-                writeResultsToFile(eventNames[e], &rollNumbers[e * maxParticipants],
-                    scores[e], top);
-            }
-            cout << "\nCertificates generated for all winners!" << endl;
+            showWinnersAndGenerateCertificates(maxParticipants, eventCounter, eventNames, names,
+                rollNumbers, participantCount, scores);
         }
         else if (choice == 5) {
             cout << "Thank you for using TechFest Management System!" << endl;
@@ -450,6 +520,7 @@ int main() {
         }
     }
 
+    // Cleanup memory
     for (int i = 0; i < maxEvents; i++) {
         delete[] eventNames[i];
         delete[] eventDates[i];
