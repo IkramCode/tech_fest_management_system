@@ -257,25 +257,25 @@ bool strComp(const char* str1, const char* str2) {
         str1++;
         str2++;
     }
-    return *str1 == *str2; // Both should reach null terminator
+    return *str1 == *str2;
 }
 
 bool uniqueRollNumber(char** rollNumbers, int count, const char* roll) {
     for (int i = 0; i < count; i++) {
         if (strComp(rollNumbers[i], roll)) {
-            return false; // Roll number already exists
+            return false;
         }
     }
-    return true; // Unique roll number
+    return true;
 }
 
 bool uniqueContact(char** contacts, int count, const char* contact) {
     for (int i = 0; i < count; i++) {
         if (strComp(contacts[i], contact)) {
-            return false; // Contact already exists
+            return false;
         }
     }
-    return true; // Unique contact
+    return true;
 }
 
 void getUniqueRollNumber(char** rollNumbers, int count, char* roll) {
@@ -283,7 +283,7 @@ void getUniqueRollNumber(char** rollNumbers, int count, char* roll) {
         cout << "Enter Roll Number: ";
         cin.getline(roll, 100);
         if (uniqueRollNumber(rollNumbers, count, roll)) {
-            return; // Unique roll number found
+            return;
         }
         cout << "Roll number already exists. Please enter a unique roll number." << endl;
     }
@@ -294,7 +294,7 @@ void getUniqueContact(char** contacts, int count, char* contact) {
         cout << "Enter Contact: ";
         cin.getline(contact, 100);
         if (uniqueContact(contacts, count, contact)) {
-            return; // Unique contact found
+            return;
         }
         cout << "Contact already exists. Please enter a unique contact." << endl;
     }
@@ -520,7 +520,6 @@ int main() {
         }
     }
 
-    // Cleanup memory
     for (int i = 0; i < maxEvents; i++) {
         delete[] eventNames[i];
         delete[] eventDates[i];
