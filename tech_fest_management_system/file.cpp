@@ -278,10 +278,156 @@ bool uniqueContact(char** contacts, int count, const char* contact) {
     return true;
 }
 
+// INPUT VALIDATION FUNCTIONS
+bool isAlpha(char c) {
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' ';
+}
+
+bool isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+bool isAlphaNumeric(char c) {
+    return isAlpha(c) || isDigit(c);
+}
+
+bool isContactChar(char c) {
+    return isDigit(c) || c == '-' || c == '+' || c == ' ';
+}
+
+void getValidName(char* name, const char* prompt) {
+    while (true) {
+        cout << prompt;
+        cin.getline(name, 100);
+        bool valid = true;
+        int len = strLen(name);
+
+        if (len == 0) {
+            valid = false;
+        }
+        else {
+            for (int i = 0; i < len; i++) {
+                if (!isAlpha(name[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+
+        if (valid) {
+            break;
+        }
+        cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+    }
+}
+
+void getValidDepartment(char* dept) {
+    while (true) {
+        cout << "Enter Department: ";
+        cin.getline(dept, 100);
+        bool valid = true;
+        int len = strLen(dept);
+
+        if (len == 0) {
+            valid = false;
+        }
+        else {
+            for (int i = 0; i < len; i++) {
+                if (!isAlpha(dept[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+
+        if (valid) {
+            break;
+        }
+        cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+    }
+}
+
+void getValidRollNumber(char* roll, const char* prompt) {
+    while (true) {
+        cout << prompt;
+        cin.getline(roll, 100);
+        bool valid = true;
+        int len = strLen(roll);
+
+        if (len == 0) {
+            valid = false;
+        }
+        else {
+            for (int i = 0; i < len; i++) {
+                if (!isAlphaNumeric(roll[i]) && roll[i] != '-') {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+
+        if (valid) {
+            break;
+        }
+        cout << "Invalid input. Please enter only alphanumeric characters and hyphens." << endl;
+    }
+}
+
+void getValidContact(char* contact, const char* prompt) {
+    while (true) {
+        cout << prompt;
+        cin.getline(contact, 100);
+        bool valid = true;
+        int len = strLen(contact);
+
+        if (len == 0) {
+            valid = false;
+        }
+        else {
+            for (int i = 0; i < len; i++) {
+                if (!isContactChar(contact[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+
+        if (valid) {
+            break;
+        }
+        cout << "Invalid input. Please enter only numbers, spaces, hyphens, and plus signs." << endl;
+    }
+}
+
+void getValidEventName(char* eventName) {
+    while (true) {
+        cout << "Enter Event Name: ";
+        cin.getline(eventName, 100);
+        bool valid = true;
+        int len = strLen(eventName);
+
+        if (len == 0) {
+            valid = false;
+        }
+        else {
+            for (int i = 0; i < len; i++) {
+                if (!isAlpha(eventName[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+
+        if (valid) {
+            break;
+        }
+        cout << "Invalid input. Please enter only alphabetic characters and spaces." << endl;
+    }
+}
+
 void getUniqueRollNumber(char** rollNumbers, int count, char* roll) {
     while (true) {
-        cout << "Enter Roll Number: ";
-        cin.getline(roll, 100);
+        getValidRollNumber(roll, "Enter Roll Number: ");
         if (uniqueRollNumber(rollNumbers, count, roll)) {
             return;
         }
@@ -291,8 +437,7 @@ void getUniqueRollNumber(char** rollNumbers, int count, char* roll) {
 
 void getUniqueContact(char** contacts, int count, char* contact) {
     while (true) {
-        cout << "Enter Contact: ";
-        cin.getline(contact, 100);
+        getValidContact(contact, "Enter Contact: ");
         if (uniqueContact(contacts, count, contact)) {
             return;
         }
@@ -302,9 +447,8 @@ void getUniqueContact(char** contacts, int count, char* contact) {
 
 void addEvent(const int maxEvents, int& eventCounter, char** eventNames, char** eventDates, int* timeSlots, int* eventTimes) {
     if (eventCounter < maxEvents) {
-        cout << "Enter Event Name: ";
         cin.ignore();
-        cin.getline(eventNames[eventCounter], 100);
+        getValidEventName(eventNames[eventCounter]);
         getValidDate(eventDates[eventCounter]);
         eventTimes[eventCounter] = timeSelect(timeSlots);
         char timeStr[20];
@@ -343,13 +487,11 @@ void registerParticipant(const int maxEvents, const int maxParticipants, int eve
         return;
     }
 
-    cout << "Enter Name: ";
     cin.ignore();
-    cin.getline(names[ev * maxParticipants + participantCount[ev]], 100);
+    getValidName(names[ev * maxParticipants + participantCount[ev]], "Enter Name: ");
     getUniqueRollNumber(rollNumbers + ev * maxParticipants, participantCount[ev],
         rollNumbers[ev * maxParticipants + participantCount[ev]]);
-    cout << "Enter Department: ";
-    cin.getline(departments[ev * maxParticipants + participantCount[ev]], 100);
+    getValidDepartment(departments[ev * maxParticipants + participantCount[ev]]);
     getUniqueContact(contacts + ev * maxParticipants, participantCount[ev],
         contacts[ev * maxParticipants + participantCount[ev]]);
 
